@@ -17,4 +17,5 @@ Simple setup to update your currently played Super Mario World Romhack via Fireb
 - Pressing `F3` will increment the current Exits by 1 - Hotkey is changeable via Firebot UI
 
 *Future plans*:
-Working on an automatic scraping of the required data from smw-central to further ease the process. :slight_smile:
+
+Working on an automatic scraping of the required data from smw-central to further ease the process.
