@@ -1,0 +1,3 @@
+@echo off
+npm install node-html-parser -y
+echo done...
