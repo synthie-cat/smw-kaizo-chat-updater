@@ -64,7 +64,7 @@ async function run(runRequest) {
         effects: [
             {
                 type: `firebot:chat`,
-                message: `!romhack ${romhackInfo.name}, ${romhackInfo.author}, ${romhackInfo.exits}, ${romhackInfo.type}`,
+                message: `!romhackupdate ${romhackInfo.name}, ${romhackInfo.author}, ${romhackInfo.exits}, ${romhackInfo.type}`,
                 chatter: `Bot`,
             },
         ],
