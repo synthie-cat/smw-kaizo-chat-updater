@@ -1,7 +1,7 @@
 'use strict';
 
 const
-    smw = require('./smw')
+    smw = require('./smwcparser')
 ;
 
 async function run(runRequest) {
@@ -64,8 +64,7 @@ async function run(runRequest) {
         effects: [
             {
                 type: `firebot:chat`,
-                message: `'${romhackInfo.name}' by ${romhackInfo.author}` +
-                        `, ${romhackInfo.type}, ${romhackInfo.exits}`,
+                message: `!romhack ${romhackInfo.name}, ${romhackInfo.author}, ${romhackInfo.exits}, ${romhackInfo.type}`,
                 chatter: `Bot`,
             },
         ],

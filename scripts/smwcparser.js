@@ -10,9 +10,9 @@ const
 async function getRomhackInfo_Async(romhackName)
 {
     try {
-        romhackName = getParsedRomhackName(romhackName);
+        let romhackName_Parsed = getParsedRomhackName(romhackName);
         let html = await getHtml_Async(romhackName);
-        let info = getRomhackInfo_FromHtml(html);
+        let info = getRomhackInfo_FromHtml(html, romhackName_Parsed);
 
         return info;
     } catch (e) {
@@ -76,21 +76,13 @@ function getParsedRomhackName(romhackName_Raw)
 }
 
 
-function getRomhackInfo_FromHtml(html)
+function getRomhackInfo_FromHtml(html, romhackName_Parsed)
 {
     let root = nodeHtmlParser.parse(html);
 
     let table = root.querySelector('.list');
     let tbody = table.querySelector('tbody');
     let trs = tbody.querySelectorAll('tr');
-    if (trs.length > 1) {
-        return {
-            error: {
-                type: 'multiple-results',
-            },
-        };
-    }
-
     if (trs.length === 0) {
         return {
             error: {
@@ -99,13 +91,34 @@ function getRomhackInfo_FromHtml(html)
         };
     }
 
-    let tds = trs[0].querySelectorAll('td');
+    if (trs.length === 1)
+        return getRomhackInfo_FromTr(trs[0]);
+
+    for (let tr of trs) {
+        let romhackInfo = getRomhackInfo_FromTr(tr);
+        if (getParsedRomhackName(romhackInfo.name) === romhackName_Parsed)
+            return romhackInfo;
+    }
+
+    return {
+        error: {
+            type: 'multiple-results',
+        },
+    };
+}
+
+function getRomhackInfo_FromTr(tr)
+{
+    let tds = tr.querySelectorAll('td');
     
+	let exit = /[0-9]*/g;
+	let exitN = exit.exec(tds[3].innerHTML);
+	
     return {
         error: null,
 
         name: tds[0].querySelector('a').innerHTML,
-        exits: tds[3].innerHTML,
+        exits: exitN[0],
         type: tds[4].innerHTML,
         author: tds[5].querySelector('a').innerHTML,
     };
