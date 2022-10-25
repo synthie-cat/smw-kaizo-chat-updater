@@ -20,7 +20,7 @@ Firebot setup to update your currently played Super Mario World Romhack via Fire
 
 ## Setup
 - Extract all files.
-- Copy Folder `kaizo_info` to a convenient place
+- Copy Folder `romhack_info` to a convenient place
 - Copy contents of `scripts` to `%APPDATA%\Firebot\v5\profiles\Main Profile\scripts`
 - Download and install [NodeJS](https://nodejs.org/en/download/)
 - Press `WIN+R` on your keyboard then enter `powershell npm install node-html-parser`
