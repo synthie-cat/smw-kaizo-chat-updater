@@ -2,8 +2,8 @@
 
 Firebot setup to update your currently played Super Mario World Romhack via Firebot and track your progress.
 
-* `!romhack` command for manual update
-* `!smwc` command for automatic fetch of Romhack infos
+* `!romhackupdate` command for manual update
+* `!romhacksearch` command for automatic fetch of Romhack infos
 * Comes with five `.txt` files to easily integrate to OBS
 * Integrated hotkeys to manage your exit progress via counters
 * Includes an auto backup so you don't lose progress when changing hacks
