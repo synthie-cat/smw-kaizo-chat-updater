@@ -2,8 +2,8 @@
 
 Firebot setup to update your currently played Super Mario World Romhack via Firebot and track your progress.
 
-* `!romhack` command for manual update
-* `!smwc` command for automatic fetch of Romhack infos
+* `!romhackupdate` command for manual update
+* `!romhacksearch` command for automatic fetch of Romhack infos
 * Comes with five `.txt` files to easily integrate to OBS
 * Integrated hotkeys to manage your exit progress via counters
 * Includes an auto backup so you don't lose progress when changing hacks
@@ -20,7 +20,7 @@ Firebot setup to update your currently played Super Mario World Romhack via Fire
 
 ## Setup
 - Extract all files.
-- Copy Folder `kaizo_info` to a convenient place
+- Copy Folder `romhack_info` to a convenient place
 - Copy contents of `scripts` to `%APPDATA%\Firebot\v5\profiles\Main Profile\scripts`
 - Download and install [NodeJS](https://nodejs.org/en/download/)
 - Press `WIN+R` on your keyboard then enter `powershell npm install node-html-parser`
