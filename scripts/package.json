@@ -1,7 +1,0 @@
-{
-  "name": "smw-romhack-finder",
-  "version": "0.0.1",
-  "dependencies": {
-    "node-html-parser": "6.1.*"
-  }
-}

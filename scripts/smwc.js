@@ -1,3 +1,9 @@
+// ******************************************************************
+// ** Code by EvilAdmiralKivi (https://twitch.tv/EvilAdmiralKivi)  **
+// ** Repo: https://github.com/synthie-cat/smw-kaizo-chat-updater  **
+// ** Licensed under MIT License								   **
+// ******************************************************************
+
 'use strict';
 
 const
