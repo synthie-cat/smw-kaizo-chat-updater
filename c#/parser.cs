@@ -23,8 +23,8 @@ public class CPHInline
         RomhackInfo info = Parser.GetRomhackInfo(romhackSearch).GetAwaiter().GetResult();
         // Backup
         string logDate = DateTime.Now.ToString("dd.MM.");
-		string logTime = DateTime.Now.ToString("HH:mm");
-        string romhackBackup = "[" + logDate + " / " +  logTime + "] " + romhackInput;
+        string logTime = DateTime.Now.ToString("HH:mm");
+        string romhackBackup = "[" + logDate + " / " + logTime + "] " + romhackInput;
         string history = "_history.txt";
         string suggestions = "_suggestions.md";
         string currentDirectory = Directory.GetCurrentDirectory();
@@ -40,7 +40,7 @@ public class CPHInline
             if (command.ToLower() == "search")
             {
                 CPH.SendMessage($"Result: {info.Name} by {info.Author} with {info.Exits} Exits.");
-				CPH.SendMessage($"Link: {info.Url}");
+                CPH.SendMessage($"Link: {info.Url}");
             }
             else if (command.ToLower() == "update")
             {
@@ -224,13 +224,13 @@ public class Parser
             String tr = Parser.FindNextStartEnd(ref tbody, "<tr>", "</tr>");
             if (tr == null)
                 break;
-			/* Name */
+            /* Name */
             String nameTd = Parser.FindNextStartEnd(ref tr, "<td class=\"text\">", "</td>");
             if (nameTd == null)
                 break;
-			String url = FindStartEnd(nameTd, "href=", ">");
-			if (url == null)
-				break;
+            String url = FindStartEnd(nameTd, "href=", ">");
+            if (url == null)
+                break;
             String name = Parser.FindStartEnd(nameTd, "<a ", "</a>");
             if (name == null)
                 break;
@@ -290,13 +290,12 @@ public class RomhackInfo
     public RomhackInfo(string name, string url, int exits, string type, string author, String error)
     {
         this.Name = name;
-		this.Exits = exits;
+        this.Exits = exits;
         this.Type = type;
         this.Author = author;
         this.Error = error;
-
-		var match = Regex.Match(url, @"id=(\d+)");
-		string id =  match.Groups[1].Value;
-		this.Url = "https://www.smwcentral.net/?p=section&a=details&id=" + id; 
+        var match = Regex.Match(url, @"id=(\d+)");
+        string id = match.Groups[1].Value;
+        this.Url = "https://www.smwcentral.net/?p=section&a=details&id=" + id;
     }
 }
