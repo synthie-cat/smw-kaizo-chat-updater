@@ -10,4 +10,4 @@
 
 ## ToDo
 - `restore` command
-- Permissions for `update`
+- Refactoring and clean-up
