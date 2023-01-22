@@ -13,51 +13,64 @@ public class CPHInline
 {
     public bool Execute()
     {
-        // Command Setup
-        string romhackInput = CPH.GetGlobalVar<string>("romhack");
-        string currentUser = CPH.GetGlobalVar<string>("targetUser");
+        // Import Globals
+        string romhackInput = CPH.GetGlobalVar<string>("romhack"); // Raw Input
+        string currentUser = CPH.GetGlobalVar<string>("targetUser"); // Current user
+        string broadcastUser = CPH.GetGlobalVar<string>("broadcastUser"); // Account that is set as broadcaster in Streamer.Bot for permissions check
+        bool targetUserMod = CPH.GetGlobalVar<bool>("targetUserMod"); // See if current user is a moderator for permissions check
+        int currentExits = CPH.GetGlobalVar<int>("info.currentExits"); // Get current progress for restore
+        int infoExits = CPH.GetGlobalVar<int>("info.Exits"); // Get exits of current hack for restore
+        // Split raw input into parts to make it more managable
         string[] parts = romhackInput.Split(' ');
+        // first argument becomes the command
         string command = parts[0];
+        // Rebuilding the search term
         string[] romhackSearchArray = parts.Skip(1).ToArray();
         string romhackSearch = string.Join(" ", romhackSearchArray);
-        RomhackInfo info = Parser.GetRomhackInfo(romhackSearch).GetAwaiter().GetResult();
-        // Backup
-        string logDate = DateTime.Now.ToString("dd.MM.");
-        string logTime = DateTime.Now.ToString("HH:mm");
-        string romhackBackup = "[" + logDate + " / " + logTime + "] " + romhackInput;
-        string history = "_history.txt";
-        string suggestions = "_suggestions.md";
+        // Creation of house-keeping variables
+        string logTime = DateTime.Now.ToString("dd.MM." + "HH:mm");
+        string romhackBackup = "[" + logTime + "] " + romhackInput;
         string currentDirectory = Directory.GetCurrentDirectory();
-        string historyPath = Path.Combine(currentDirectory, history);
-        string suggestionsPath = Path.Combine(currentDirectory, suggestions);
+        string historyPath = Path.Combine(currentDirectory, "_history.txt"); // Backup File
+        string suggestionsPath = Path.Combine(currentDirectory, "_suggestions.md"); // Hack suggestions file
+        // Dictionary for Error Messages
         Dictionary<string, string> errorMessages = new Dictionary<string, string>{{"http-error", "Error: HTTP Error occurred. Please try again."}, {"no-results", "Error: No results found. Make sure the Romhack exists and your spelling is correct."}, {"multiple-results", "Error: Multiple results found. Please write the complete name of the Romhack you are looking for."}};
-        if (info.Error != null)
+        //Parsing the Romhack
+        RomhackInfo info = Parser.GetRomhackInfo(romhackSearch).GetAwaiter().GetResult();
+        if (info.Error != null) // If there's an error we cannot proceed; tell the user what went wrong
         {
             CPH.SendMessage(errorMessages[info.Error]);
         }
-        else
+        else // If no error continue
+        /* 
+		*****************************************************************************************
+		* This Code is currently a mess. I will refactor it eventually, currently still trying  *
+		* to add all features that make sense.                                                  *
+		*****************************************************************************************
+		*/
         {
-            if (command.ToLower() == "search")
+            if (command.ToLower() == "search") // Simple search that returns the hack
             {
-                CPH.SendMessage($"Result: {info.Name} by {info.Author} with {info.Exits} Exits.");
+                CPH.SendMessage($"{info.Name} is a hack by {info.Author} with {info.Exits} Exits. It is a {info.Type} hack.");
                 CPH.SendMessage($"Link: {info.Url}");
             }
-            else if (command.ToLower() == "update")
+            else if (command.ToLower() == "update" && (currentUser == broadcastUser || targetUserMod)) // Update the overlay if user is Broadcaster or Moderator
             {
                 // Update OBS
-                CPH.ObsSetGdiText("[O]Romhack Info", "info.Name", info.Name);
-                CPH.ObsSetGdiText("[O]Romhack Info", "info.Author", "by: " + info.Author);
-                CPH.ObsSetGdiText("[O]Romhack Info", "info.Exits", $"Exits: 0/{info.Exits}");
-                CPH.ObsSetGdiText("[O]Romhack Info", "info.Type", info.Type);
-                File.AppendAllText(historyPath, romhackBackup + Environment.NewLine);
+                CPH.SetGlobalVar("info.Exits", info.Exits, true); // Set exits to new value. Done like this to allow to compare it later
+                CPH.ObsSetGdiText("[O]Romhack Info", "info.Name", info.Name); // Update Romhack Name
+                CPH.ObsSetGdiText("[O]Romhack Info", "info.Author", "by: " + info.Author); // Update Romhack Author 
+                CPH.ObsSetGdiText("[O]Romhack Info", "info.Exits", $"Exits: {currentExits.ToString()}/{info.Exits}"); // Update Exits
+                CPH.ObsSetGdiText("[O]Romhack Info", "info.Type", info.Type); // Update Type
+                File.AppendAllText(historyPath, romhackBackup + Environment.NewLine); // Add this to the history file
                 CPH.SendMessage("Overlay updated.");
             }
-            else if (command.ToLower() == "history")
+            else if (command.ToLower() == "history") // To be expanded. Currently gives out a single line, will eventually be expanded
             {
                 string[] lines = File.ReadAllLines(historyPath);
                 if (lines.Length > 0)
                 {
-                    string historyLatest = lines[lines.Length - 1];
+                    string historyLatest = lines[lines.Length - 2];
                     historyLatest = Regex.Replace(historyLatest, @"^\[[^\]]*\] ", " ");
                     CPH.SendMessage(historyLatest);
                 }
@@ -66,30 +79,35 @@ public class CPHInline
                     CPH.SendMessage("Your history.txt file is empty. Make sure it exists.");
                 }
             }
-            else if (command.ToLower() == "suggest")
+            else if (command.ToLower() == "suggest") // romhack suggestion feature that generates a markdown table entry
             {
-                if (File.Exists(suggestionsPath))
-                {
-                    File.AppendAllText(suggestionsPath, $"| {logDate} {logTime} | {info.Name} | {info.Author} | {info.Exits} | {info.Type} | {info.Url} | {currentUser} | " + Environment.NewLine);
-                    CPH.SendMessage($"Successfully added {info.Name} to the suggestions, {currentUser}");
-                }
-                else
+                if (!File.Exists(suggestionsPath)) // Error if suggestions file does not exist.
                 {
                     CPH.SendMessage("Suggestions file does not exist. Please check that the file is in your bots folder and writeable.");
                 }
+                else // add the information of the suggestion to the table
+                {
+                    File.AppendAllText(suggestionsPath, $"| {logTime} | {info.Name} | {info.Author} | {info.Exits} | {info.Type} | {info.Url} | {currentUser} | " + Environment.NewLine);
+                    CPH.SendMessage($"Successfully added {info.Name} to the suggestions, {currentUser}");
+                }
             }
-            else if (command.ToLower() == "restore")
+            else if (command.ToLower() == "restore") // WIP
             {
                 CPH.SendMessage("Not yet implemented.");
             }
-            else if (command.ToLower() == "setup")
+            else if (command.ToLower() == "setup") // Setup routine.
             {
-                if (!CPH.ObsIsStreaming())
+                if (!CPH.ObsIsStreaming() && currentUser == broadcastUser) // Permission check: Only broadcaster is allowed to use the setup.
                 {
-                    CPH.ObsSendRaw("CreateScene", "{\"sceneName\":\"[O] Romhack Info\"}", 0);
-                    // CPH.ObsSendRaw("SetCurrentProgramScene", "{\"sceneName\":\"[O] Romhack Info\"}", 0);
+                    CPH.ObsSendRaw("CreateScene", "{\"sceneName\":\"[O] Romhack Info\"}", 0); // Create the Overlay scene in OBS
+                    // Setup data and variables.
                     string[] inputNames = {"info.Name", "info.Author", "info.Exits", "info.Type"};
                     string[] textValues = {"Evil Doopu World", "By: EvilAdmiralKivi", "Exits: 0/6", "Kaizo: Intermediate"};
+                    CPH.SetGlobalVar("info.Name", "Evil Doopu World", true);
+                    CPH.SetGlobalVar("info.Author", "By: EvilAdmiralKivi", true);
+                    CPH.SetGlobalVar("info.currentExits", 0, true);
+                    CPH.SetGlobalVar("info.Exits", 6, true);
+                    CPH.SetGlobalVar("info.Type", "Kaizo: Intermediate", true);
                     int positionY = 0;
                     for (int i = 0; i < inputNames.Length; i++)
                     {
@@ -99,6 +117,7 @@ public class CPHInline
                     }
 
                     CPH.SendMessage("Overlay successfully created. Check your OBS.");
+                    // Generate the backup file and suggestions table
                     if (!File.Exists(historyPath) && !File.Exists(suggestionsPath))
                     {
                         File.Create(historyPath).Close();
